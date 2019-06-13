@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/pnotify.custom.min.css" />
+    <link rel="stylesheet" href="assets/css/font-awesome.min.css" />
+
+    <style>
+        .gap {
+            margin: 2em;
+        }
+
+        .card {
+            box-shadow: 1px 1px 8px 1px rgba(0, 0, 0, 0.1);
+            padding: 2em;
+            border-top: 6px solid #999;
+        }
+    </style>
+
+    <title>Image Upload</title>
+</head>
+
+<body>
+    <div class="container">
+        <div class="gap"></div>
+        <div class="col-md-6 col-md-offset-3">
+            <div class="card">
+                <form action="image-backend.php" class="image-upload" enctype="multipart/form-data" method="POST">
+                    <div class="form-group">
+                        <input type="file" name="image" class="form-control">
+                    </div>
+                    <button class="btn btn-primary"><i class="fa fa-upload"></i> Upload</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript" src="assets/js/jquery.min.js" nonce=""></script>
+    <script type="text/javascript" src="assets/js/bootstrap.min.js" nonce=""></script>
+    <script type="text/javascript" src="assets/js/pnotify.custom.min.js" nonce=""></script>
+    <script>
+        PNotify.prototype.options.styling = "bootstrap3";
+        PNotify.prototype.options.styling = "fontawesome";
+        $(function () {
+            $('.image-upload').on('submit', function (e) {
+                e.preventDefault(); // disable html native submit
+                var self = this; // get "this" inside a variable for further use.
+
+                var submit_btn = $(self).find('.btn'); // get the buttons inside the form
+
+                submit_btn.prop('disabled', true); // disable the button for preventing submit more than once
+                $.ajax({
+                    type: $(self).attr('method'), // get form method
+                    url: $(self).attr('action'), // get form action
+                    data: new FormData(self), // rathar than using serialize we will use "new FormData()" function (js native function)
+                    dataType: "json",
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        submit_btn.prop('disabled', false); // enable the buttons for next submit
+                        $(self)[0].reset(); // reset the form for next submit
+                        console.log(result);
+                        if (result.status == 'success') {
+                            new PNotify({
+                                title: 'Success!',
+                                text: result.message,
+                                type: 'success'
+                            }); // I used PNotify to show the status
+                        } else if (result.status == 'error') {
+                            new PNotify({
+                                title: 'Oh No!',
+                                text: result.message,
+                                type: 'error'
+                            }); // I used PNotify to show the status
+                        }
+                    },
+                    error: function (er, e2) {
+                        submit_btn.prop('disabled', false); // enable the buttons for next submit in case there is an error
+                        console.log(er, e2); // logging the errors
+                        new PNotify({
+                            title: 'Unexpected Error!',
+                            text: 'Something went wrong. Please try later',
+                            type: 'error'
+                        }); // I used PNotify to show the status
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
